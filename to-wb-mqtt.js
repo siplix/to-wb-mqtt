@@ -77,13 +77,13 @@ class WbMqtt extends EventEmitter {
     this._mqttClient.on('close', () => {
       this.status = 'disconnected';
       console.log(`[TO-WB-MQTT] ${this.drvName} - disconnected`);
-      // this.emit('status', 'disconnected');
+      this.emit('status', 'disconnected');
     });
 
     this._mqttClient.on('reconnect', () => {
       this.status = 'reconnecting';
       console.log(`[TO-WB-MQTT] ${this.drvName} - reconnecting`);
-      // this.emit('status', 'reconnecting');
+      this.emit('status', 'reconnecting');
     });
   }
 
@@ -92,6 +92,8 @@ class WbMqtt extends EventEmitter {
       const topic = `/devices/${this.drvName}/controls/${cmd}`;
       const payload = val.toString();
       this._mqttClient.publish(topic, payload);
+    } else {
+      console.log(`[TO-WB-MQTT] ${this.drvName} - invalid control`);
     }
   }
 
