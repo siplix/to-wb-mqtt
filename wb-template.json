@@ -1,0 +1,75 @@
+{
+  "meta": {
+    "driver": "NodeJS",
+    "title": "ironLogic_1",
+    "error": ""
+  },
+  "controls": [
+    {
+      "title": "addresses",
+      "type": "text",
+      "readonly": true,
+      "order": 0
+    },
+    {
+      "title": "SNs",
+      "type": "text",
+      "readonly": true,
+      "order": 1
+    },
+    {
+      "title": "connect",
+      "type": "switch",
+      "readonly": false,
+      "order": 2
+    },
+    {
+      "title": "open_1270",
+      "type": "pushbutton",
+      "readonly": false,
+      "order": 3
+    },
+    {
+      "title": "time_1270",
+      "type": "text",
+      "readonly": true,
+      "order": 4
+    },
+    {
+      "title": "open_1294",
+      "type": "pushbutton",
+      "readonly": false,
+      "order": 5
+    },
+    {
+      "title": "time_1294",
+      "type": "text",
+      "readonly": true,
+      "order": 6
+    },
+    {
+      "title": "open_1330",
+      "type": "pushbutton",
+      "readonly": false,
+      "order": 7
+    },
+    {
+      "title": "time_1330",
+      "type": "text",
+      "readonly": true,
+      "order": 8
+    },
+    {
+      "title": "heartBeat",
+      "type": "value",
+      "readonly": true,
+      "order": 9
+    },
+    {
+      "title": "reboot",
+      "type": "pushbutton",
+      "readonly": false,
+      "order": 10
+    }
+  ]
+}
