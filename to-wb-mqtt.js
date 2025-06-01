@@ -5,7 +5,33 @@ const MQTT_IP = '127.0.0.1';
 const MQTT_USER = 'mqtusr';
 const MQTT_PASS = 'mqtpaswd';
 
+// Класс, создающий виртуальное устройство Wiren Board
 class WbMqtt extends EventEmitter {
+  /**
+   * Cоздает виртуальное устройство Wiren Board в соответствии с переданым шаблоном
+   *
+   * Пераметры:
+   * template - JSON шаблон вида:
+   *  {
+   *    "meta": {
+   *      "driver": "NodeJS",
+   *      "title": "ironLogic_1",
+   *      "error": ""
+   *    },
+   *    "controls": [
+   *      {
+   *        "title": "addresses",
+   *        "type": "text",
+   *        "readonly": true,
+   *        "order": 0
+   *      },
+   *      .... 
+   *    ]}
+   *  }
+   *
+   * Методы:
+   * wbPublish(cmd, val, retain) - Публикует значение в топик, соответствующий указаному колтролу
+   */
   constructor(template) {
     super();
     this.template = this._templateValidate(template);
@@ -25,10 +51,12 @@ class WbMqtt extends EventEmitter {
       reconnectPeriod: 5000,
       connectTimeout: 3000,
     };
-    if (MQTT_USER && MQTT_PASS) {
-      options.username = MQTT_USER;
-      options.password = MQTT_PASS;
-    }
+    try {
+      if (MQTT_USER && MQTT_PASS) {
+        options.username = MQTT_USER;
+        options.password = MQTT_PASS;
+      }
+    } catch (e) {}
     this._mqttClient = MQTT.connect(options);
     this._init();
   }
@@ -37,7 +65,7 @@ class WbMqtt extends EventEmitter {
     this._mqttClient.on('connect', () => {
       const mqttInitValues = [];
       const mqttSubscribeTopics = [];
-      
+
       this.template.controls.forEach((control) => {
         this._controls.push(control.title);
         if (!control.readonly) {
@@ -59,41 +87,69 @@ class WbMqtt extends EventEmitter {
 
       console.log(`[TO-WB-MQTT] ${this.drvName} - connected`);
       this.status = 'connected';
-      this.emit('status', 'connected');
+      try {
+        this.emit('status', 'connected');
+      } catch (e) {
+        console.log('[TO-WB-MQTT]', 'emit status connected', e);
+      }
     });
 
     this._mqttClient.on('message', (topic, message) => {
       // message is Buffer
       const val = message.toString();
       const control = topic.match(/controls\/([^\/]*)/)[1];
-      this.emit('cmd', control, val);
+      try {
+        this.emit('cmd', control, val);
+      } catch (e) {
+        console.log('[TO-WB-MQTT]', 'emit cmd', e);
+      }
     });
 
     this._mqttClient.on('error', (error) => {
       console.log(`[TO-WB-MQTT] ${this.drvName} - ${error.message}`);
-      // this.emit('error', error);
+      try {
+       this.emit('error', error);
+      } catch (e) {
+        console.log('[TO-WB-MQTT]', 'emit error', e);
+      }
     });
 
     this._mqttClient.on('close', () => {
       this.status = 'disconnected';
       console.log(`[TO-WB-MQTT] ${this.drvName} - disconnected`);
-      this.emit('status', 'disconnected');
+      try {
+        this.emit('status', 'disconnected');
+      } catch (e) {
+        console.log('[TO-WB-MQTT]', 'emit status disconnected', e);
+      }
     });
 
     this._mqttClient.on('reconnect', () => {
       this.status = 'reconnecting';
       console.log(`[TO-WB-MQTT] ${this.drvName} - reconnecting`);
-      this.emit('status', 'reconnecting');
+      try {
+        this.emit('status', 'reconnecting');
+      } catch (e) {
+        console.log('[TO-WB-MQTT]', 'emit status reconnecting', e);
+      }
     });
   }
 
-  wbPublish(cmd, val) {
+  wbPublish(cmd, val, retain = false) {
     if (this._controls.includes(cmd)) {
       const topic = `/devices/${this.drvName}/controls/${cmd}`;
       const payload = val.toString();
-      this._mqttClient.publish(topic, payload);
+      this._mqttClient.publish(topic, payload, { retain: retain });
     } else {
       console.log(`[TO-WB-MQTT] ${this.drvName} - invalid control`);
+    }
+  }
+
+  cleanUp(cb) {
+    if (this._mqttClient && this._mqttClient.connected) {
+      this._mqttClient.end(true, cb());
+    } else {
+      cb();
     }
   }
 
