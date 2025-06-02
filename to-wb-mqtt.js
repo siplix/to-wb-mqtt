@@ -2,8 +2,8 @@ const MQTT = require('mqtt');
 const EventEmitter = require('events');
 
 const MQTT_IP = '127.0.0.1';
-const MQTT_USER = 'mqtusr';
-const MQTT_PASS = 'mqtpaswd';
+// const MQTT_USER = 'mqtusr';
+// const MQTT_PASS = 'mqtpaswd';
 
 // Класс, создающий виртуальное устройство Wiren Board
 class WbMqtt extends EventEmitter {
@@ -141,7 +141,7 @@ class WbMqtt extends EventEmitter {
       const payload = val.toString();
       this._mqttClient.publish(topic, payload, { retain: retain });
     } else {
-      console.log(`[TO-WB-MQTT] ${this.drvName} - invalid control`);
+      console.log(`[TO-WB-MQTT] ${this.drvName} - invalid control or MQTT problem`);
     }
   }
 
